@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {Layer, Rect, Stage} from 'react-konva';
-import Enemy from './Enemy';
+import {Enemy, Player} from './GameObjects';
+import {cellSize, height, enemiesSpawnPerSecond, speed, enemySpeed} from './constants';
 
 const Keys = {
     left: false,
@@ -8,16 +9,8 @@ const Keys = {
     up: false,
     down: false,
 };
-const height = 700;
-const cellSize = 50;
-const enevmiesSpawnPerSecond = 0.5;
-const Player = ({x, y}) => (
-    <Rect
-        x={x} y={y} width={cellSize} height={cellSize}
-        fill={'green'}
-        shadowBlur={1}
-    />
-);
+
+
 const createEnemy = () => ({
     x: -cellSize,
     y: Math.random() * (height - cellSize)
@@ -63,7 +56,7 @@ class App extends Component {
 
     spawnEnemies = () => {
         const time = new Date().getTime();
-        if (time - this.state.lastSpawn > 1000 / enevmiesSpawnPerSecond) {
+        if (time - this.state.lastSpawn > 1000 / enemiesSpawnPerSecond) {
             const enemies = this.state.enemies;
             enemies.push(createEnemy());
             this.setState({
@@ -72,23 +65,24 @@ class App extends Component {
             });
         }
     };
+
     //TODO: handle speed for diagonal movement
     update = () => {
         if (Keys.up) {
-            this.setState({y: this.state.y - 4})
+            this.setState({y: this.state.y - speed})
         }
         else if (Keys.down) {
-            this.setState({y: this.state.y + 4})
+            this.setState({y: this.state.y + speed})
         }
 
         if (Keys.left) {
-            this.setState({x: this.state.x - 4})
+            this.setState({x: this.state.x - speed})
         }
         else if (Keys.right) {
-            this.setState({x: this.state.x + 4})
+            this.setState({x: this.state.x + speed})
         }
         const newEnemies = this.state.enemies.map(enemy => ({
-            x: enemy.x + 0.5, y: enemy.y
+            x: enemy.x + enemySpeed, y: enemy.y
         }));
         this.setState({enemies: newEnemies});
         this.spawnEnemies();
@@ -96,12 +90,13 @@ class App extends Component {
     };
 
     render() {
+        const {x, y, enemies} = this.state;
         return (
             <div style={{margin: '0 auto', width: height, border: '1px solid black'}}>
                 <Stage width={height} height={height}>
                     <Layer>
-                        <Player x={this.state.x} y={this.state.y}/>
-                        {this.state.enemies.map((enemy, i) =>
+                        <Player x={x} y={y}/>
+                        {enemies.map((enemy, i) =>
                             <Enemy key={i} x={enemy.x} y={enemy.y}/>
                         )}
                     </Layer>
