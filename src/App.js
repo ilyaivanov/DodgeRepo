@@ -21,6 +21,8 @@ class App extends Component {
             x: boardSize / 2 - cellSize / 2,
             y: boardSize / 2 - cellSize / 2,
             enemies: [],
+            gameOver: false,
+            lastSpawn: 0,
         };
     }
 
@@ -44,8 +46,8 @@ class App extends Component {
             else if (kc === 39) Keys.right = false;
             else if (kc === 40) Keys.down = false;
         };
-        const lastSpawn = new Date().getTime();
-        this.setState({lastSpawn});
+
+
         requestAnimationFrame(this.update);
     }
 
@@ -59,12 +61,28 @@ class App extends Component {
                 lastSpawn: time,
                 enemies,
             });
-            console.log(this.state.enemies.length)
+
         }
     };
 
+    replay = () => {
+        this.setState({
+            enemies: [],
+            gameOver: false,
+        }, () => this.update())
+    }
     //TODO: handle speed for diagonal movement
     update = () => {
+
+        const isGameOver = this.state.enemies.filter(enemy =>
+            rectOverlap({...enemy, width: cellSize, height: cellSize}, {
+                x: this.state.x,
+                y: this.state.y,
+                width: 50,
+                height: 50,
+            })).length > 0;
+        this.setState({gameOver: isGameOver});
+
         if (Keys.up) {
             this.setState({y: this.state.y - speed});
         }
@@ -81,21 +99,25 @@ class App extends Component {
         const newEnemies = this.state.enemies.map(step);
         this.setState({enemies: newEnemies});
         this.spawnEnemies();
-        requestAnimationFrame(this.update);
+        if (!this.state.gameOver)
+            requestAnimationFrame(this.update);
     };
 
     render() {
-        const {x, y, enemies} = this.state;
+        const {x, y, enemies, gameOver} = this.state;
         return (
             <div style={{margin: '0 auto', width: boardSize, border: '1px solid black'}}>
-                <Stage width={boardSize} height={boardSize}>
-                    <Layer>
-                        <Player x={x} y={y}/>
-                        {enemies.map((enemy, i) =>
-                            <Enemy key={i} x={enemy.x} y={enemy.y}/>,
-                        )}
-                    </Layer>
-                </Stage>
+                {
+                    gameOver ? <div><h1>Game over, sir.</h1><button onClick={this.replay}>Replay</button></div> :
+                        <Stage width={boardSize} height={boardSize}>
+                            <Layer>
+                                <Player x={x} y={y}/>
+                                {enemies.map((enemy, i) =>
+                                    <Enemy key={i} x={enemy.x} y={enemy.y}/>,
+                                )}
+                            </Layer>
+                        </Stage>
+                }
             </div>
         );
     }

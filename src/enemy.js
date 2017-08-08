@@ -55,7 +55,7 @@ export const createEnemy = () => {
     return ({
         ...startingPosition[enemyType](),
         enemyType,
-        speed: getRandomArbitrary(0.2, 3),
+        speed: getRandomArbitrary(0.5, 3),
     });
 };
 
