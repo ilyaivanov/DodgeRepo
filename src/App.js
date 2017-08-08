@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {Layer, Rect, Stage} from 'react-konva';
 import {Enemy, Player} from './GameObjects';
 import {cellSize, height, enemiesSpawnPerSecond, speed, enemySpeed} from './constants';
+import {createEnemy, step} from './enemy';
 
 const Keys = {
     left: false,
@@ -11,10 +12,6 @@ const Keys = {
 };
 
 
-const createEnemy = () => ({
-    x: -cellSize,
-    y: Math.random() * (height - cellSize)
-});
 
 class App extends Component {
     constructor(...args) {
@@ -81,9 +78,7 @@ class App extends Component {
         else if (Keys.right) {
             this.setState({x: this.state.x + speed})
         }
-        const newEnemies = this.state.enemies.map(enemy => ({
-            x: enemy.x + enemySpeed, y: enemy.y
-        }));
+        const newEnemies = this.state.enemies.map(step);
         this.setState({enemies: newEnemies});
         this.spawnEnemies();
         requestAnimationFrame(this.update);
@@ -107,3 +102,8 @@ class App extends Component {
 }
 
 export default App;
+
+// spawn enemy at random directions
+// spawn multiple enemies
+// collision decetion
+// randomize speed
